@@ -1,0 +1,27 @@
+{
+  "name": "timedmessagebot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "concurrently \"pnpm tsc --watch\" \"nodemon -q dist/index.js\"",
+    "start": "node dist/index.js",
+    "build": "pnpm tsc",
+    "commands": "pnpm tsc \n node dist/registerCommands.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.9.0",
+    "dotenv": "^16.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^18.16.1",
+    "concurrently": "^8.0.1",
+    "eslint": "^8.39.0",
+    "nodemon": "^2.0.22",
+    "typescript": "^5.0.4"
+  }
+}
