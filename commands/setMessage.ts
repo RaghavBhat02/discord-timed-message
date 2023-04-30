@@ -6,7 +6,7 @@ const obj = {
 		.setName('setmessage')
 		.setDescription('sets a timed Announcement.')
         .addChannelOption(opt => opt.setName('channel').setDescription('The channel to echo into').setRequired(true))
-        .addNumberOption(opt => opt.setName('time').setDescription('The time in hours.').setRequired(true))
+        .addNumberOption(opt => opt.setName('time').setDescription('The time in minutes.').setRequired(true))
         .addStringOption(opt => opt.setName('announcement').setDescription('the announcement to repeat.').setRequired(true)),
 	async execute(interaction: ChatInputCommandInteraction<CacheType>) {
         await interaction.deferReply();
