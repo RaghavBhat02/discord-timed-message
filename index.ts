@@ -14,6 +14,8 @@ const mongoClient = new MongoClient(mongoUri, {
   });
 const intervalMap = new Map<string, number>()
 
+mongoConnect();
+
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] }) as CommandClient;
 client.commands = new Collection();
 
@@ -38,24 +40,47 @@ client.once(Events.ClientReady, c => {
 });
 
 
-async function begin() {
-    const guild = await client.guilds.fetch('1100901718973239427');
-    const channel = await guild.channels.fetch('1100901719623335998');
-    if(!channel) {
-        console.error("Not an existing channel.")
+async function mongoConnect() {
+    await mongoClient.connect();
+    const db = mongoClient.db('timed0');
+    const ping = await db.command({ping: 1 });
+    console.log(`Successfully connected to db. Ping is ${ping}`)
+    const collection = db.collection('messages');
+
+
+    const messagePromises: Promise<WithId<Document> | null>[] = []
+    client.guilds.cache.forEach(guild => {
+        messagePromises.push(collection.findOne({ _id: guild.id as unknown as ObjectId }));
+    })
+    const settled = await Promise.allSettled(messagePromises);
+    const guilds = settled.map(promise => {
+        if(promise.status !== 'fulfilled') {
+            console.error("ERROR in retrieving messages.");
+            console.error(promise.status);
+            console.error(promise.reason);
         return;
     }
 
-    if(!channel.isTextBased()) {
-        console.error('not text based.');
-        return;
+        return promise.value
+
+    })
+
+    for(const guild of guilds) {
+        if(!guild) continue;
+        for(const key in guild) {
+            if(key === "_id") continue;
+
+            const channel = client.guilds.cache.get(guild._id as unknown as string)?.channels.cache.get(guild[key].channel) as TextBasedChannel;
+            if(channel) {
+                const interval = setInterval(() => {
+                    channel.send(guild[key].announcement);
+                }, guild[key].milliseconds)
+                intervalMap.set(guild._id + key, interval[Symbol.toPrimitive]());
+            }
+        }
     }
 
-    let count = 0;
-    setInterval(() => {
-        ++count;
-        channel.send(`This is an announcement. It repeats every 10s. ${count}`);
-    }, 10000)
+    return db;
 }
 
 
