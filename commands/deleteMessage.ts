@@ -29,7 +29,7 @@ const obj = {
         clearInterval(intervalNum);
         intervalMap.delete(interaction.guildId + messageId);
        
-	    await interaction.followUp(`You have successfully deleted the message with id ${messageId}`);
+	    await interaction.followUp(`You have successfully deleted the message with id \`${messageId}\``);
         return;
 	},
 }
