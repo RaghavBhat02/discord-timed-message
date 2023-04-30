@@ -17,8 +17,8 @@ const obj = {
             await interaction.reply('No channel provided or channel is not text based.')
             return;
         }
-        if(channel.type === ChannelType.GuildCategory || channel.type === ChannelType.GuildForum) {
-            await interaction.reply('channel is not text based.')
+        if(channel.type === ChannelType.GuildCategory || channel.type === ChannelType.GuildForum || (channel as unknown as APIInteractionDataResolvedChannel).permissions !== undefined || channel.type === ChannelType.GuildVoice || channel.type === ChannelType.GuildStageVoice) {
+            await interaction.reply('channel is not a text channel.')
             return;
         }
         if(!announcement) {
