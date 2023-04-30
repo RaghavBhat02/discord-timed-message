@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, ChannelType } from 'discord.js';
-import {  ChatInputCommandInteraction, CacheType } from 'discord.js';
+import {  ChatInputCommandInteraction, CacheType, PermissionFlagsBits } from 'discord.js';
 import { APIInteractionDataResolvedChannel, CategoryChannel, NewsChannel, StageChannel, TextChannel, PrivateThreadChannel, PublicThreadChannel, VoiceChannel, ForumChannel } from 'discord.js';
 
 import { MongoClient, ObjectId } from 'mongodb';
@@ -11,7 +11,8 @@ const obj = {
 		.setDescription('sets a timed Announcement.')
         .addChannelOption(opt => opt.setName('channel').setDescription('The channel to echo into').setRequired(true))
         .addNumberOption(opt => opt.setName('time').setDescription('The time in minutes.').setRequired(true))
-        .addStringOption(opt => opt.setName('announcement').setDescription('the announcement to repeat.').setRequired(true)),
+        .addStringOption(opt => opt.setName('announcement').setDescription('the announcement to repeat.').setRequired(true))
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
 	async execute(interaction: ChatInputCommandInteraction<CacheType>, mongoClient: MongoClient, intervalMap: Map<string,number> ) {
         const db = mongoClient.db('timed0');
