@@ -1,4 +1,4 @@
-import { Client, Events, GatewayIntentBits, Collection } from 'discord.js';
+import { Client, Events, GatewayIntentBits, Collection, TextBasedChannel } from 'discord.js';
 import type { CommandClient } from './types';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -58,8 +58,8 @@ async function mongoConnect() {
             console.error("ERROR in retrieving messages.");
             console.error(promise.status);
             console.error(promise.reason);
-        return;
-    }
+            return;
+        }
 
         return promise.value
 
@@ -79,10 +79,9 @@ async function mongoConnect() {
             }
         }
     }
-
+    
     return db;
 }
-
 
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
@@ -100,7 +99,7 @@ client.on(Events.InteractionCreate, async interaction => {
 	}
 
 	try {
-		await command.execute(interaction);
+		await command.execute(interaction, mongoClient, intervalMap);
 	} catch (error) {
 		console.error(error);
 		if (interaction.replied || interaction.deferred) {
@@ -113,4 +112,3 @@ client.on(Events.InteractionCreate, async interaction => {
 
 
 client.login(process.env.TOKEN);
-begin();
