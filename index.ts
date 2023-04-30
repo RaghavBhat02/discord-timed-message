@@ -2,8 +2,17 @@ import { Client, Events, GatewayIntentBits, Collection } from 'discord.js';
 import type { CommandClient } from './types';
 import fs from 'node:fs';
 import path from 'node:path';
-
+import { MongoClient, ServerApiVersion, ObjectId, WithId, Document } from 'mongodb';
 require('dotenv').config();
+const mongoUri = process.env.URI as string;
+const mongoClient = new MongoClient(mongoUri, {
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+    }
+  });
+const intervalMap = new Map<string, number>()
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] }) as CommandClient;
 client.commands = new Collection();
