@@ -1,6 +1,10 @@
 import { SlashCommandBuilder, ChannelType } from 'discord.js';
 import {  ChatInputCommandInteraction, CacheType } from 'discord.js';
-import { CategoryChannel, NewsChannel, StageChannel, TextChannel, PrivateThreadChannel, PublicThreadChannel, VoiceChannel, ForumChannel } from 'discord.js';
+import { APIInteractionDataResolvedChannel, CategoryChannel, NewsChannel, StageChannel, TextChannel, PrivateThreadChannel, PublicThreadChannel, VoiceChannel, ForumChannel } from 'discord.js';
+
+import { MongoClient, ObjectId } from 'mongodb';
+import { UUID } from 'bson'; 
+
 const obj = {
     data: new SlashCommandBuilder()
 		.setName('setmessage')
@@ -8,7 +12,10 @@ const obj = {
         .addChannelOption(opt => opt.setName('channel').setDescription('The channel to echo into').setRequired(true))
         .addNumberOption(opt => opt.setName('time').setDescription('The time in minutes.').setRequired(true))
         .addStringOption(opt => opt.setName('announcement').setDescription('the announcement to repeat.').setRequired(true)),
-	async execute(interaction: ChatInputCommandInteraction<CacheType>) {
+
+	async execute(interaction: ChatInputCommandInteraction<CacheType>, mongoClient: MongoClient, intervalMap: Map<string,number> ) {
+        const db = mongoClient.db('timed0');
+        const collection = db.collection('messages');
         await interaction.deferReply();
         const channel = interaction.options.getChannel('channel') as CategoryChannel | NewsChannel | StageChannel | TextChannel | PrivateThreadChannel | PublicThreadChannel<boolean> | VoiceChannel | ForumChannel | null;
         const initTime = interaction.options.getNumber('time');
@@ -29,11 +36,25 @@ const obj = {
             await interaction.reply('no time (in hours) given.');
             return;
         }
-        setInterval(() => {
+        const interval = setInterval(() => {
             channel.send(announcement);
-
         }, initTime * 1000 * 60)
-	    await interaction.followUp(`You have successfully set message \n----- \n${announcement} \n----- \n in channel ${channel} every ${initTime} minutes.`);
+        const uuid = new UUID().toString();
+        intervalMap.set(interaction.guildId + uuid, interval[Symbol.toPrimitive]())
+        await collection.updateOne(
+            { _id: interaction.guildId as unknown as ObjectId }, 
+            { $set: 
+                { 
+                    _id: interaction.guildId,
+                    [uuid]: {
+                        channel: channel.id,
+                        announcement,
+                        milliseconds: initTime * 1000 * 60
+                    }
+                }
+            }, 
+            { upsert: true });
+	    await interaction.followUp(`You have successfully set the following message \n----- \n${announcement} \n----- \n in channel ${channel} every ${initTime} minutes. `);
         return;
 	},
 }
