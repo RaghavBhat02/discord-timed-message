@@ -38,7 +38,12 @@ const obj = {
             return;
         }
         const interval = setInterval(() => {
-            channel.send(announcement);
+            try {
+                channel.send(announcement);
+            } catch(error) {
+                console.error(error)
+            }
+                
         }, initTime * 1000 * 60)
         const uuid = new UUID().toString();
         intervalMap.set(interaction.guildId + uuid, interval[Symbol.toPrimitive]())
