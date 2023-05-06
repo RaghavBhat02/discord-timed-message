@@ -73,7 +73,11 @@ async function mongoConnect() {
             const channel = client.guilds.cache.get(guild._id as unknown as string)?.channels.cache.get(guild[key].channel) as TextBasedChannel;
             if(channel) {
                 const interval = setInterval(() => {
-                    channel.send(guild[key].announcement);
+                    try {
+                        channel.send(guild[key].announcement);
+                    } catch(err) {
+                        console.error(`ERROR CAUGHT: Trying to send message in ${channel.isDMBased() ? `DM user ${channel?.recipientId}` : `Guid id ${key}`} in ${channel.id} with message ${guild[key].announcement} and timer ${guild[key].milliseconds} ms`)
+                    }
                 }, guild[key].milliseconds)
                 intervalMap.set(guild._id + key, interval[Symbol.toPrimitive]());
             }
