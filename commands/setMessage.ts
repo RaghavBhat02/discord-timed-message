@@ -41,6 +41,7 @@ const obj = {
             try {
                 channel.send(announcement);
             } catch(error) {
+                console.error(`ERROR | ${channel.guildId} | ${announcement}`)
                 console.error(error)
             }
                 
